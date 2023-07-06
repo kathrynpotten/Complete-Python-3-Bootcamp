@@ -194,30 +194,23 @@ possible_boards = [board for board in boards if is_impossible(board) == False]
 
 #wins
 def is_win(board):
-    win = False
-    winning_token = ''
     if board not in possible_boards:
         return False
     rows = [positions[board[i]] for i in range(0,3)]
     #horizontal
     for row in rows:
         if row[0] == row[2] == row[4]:
-            win = True
-            winning_token =  row[0]
+            return True
     #diagonal
     if rows[0][0] == rows[1][2] == rows[2][4]:
-        win = True
-        winning_token = row[0][0]
+        return True
     if rows[0][4] == rows[1][2] == rows[2][0]:
-        win = True
-        winning_token = rows[0][4]
+        return True
     #vertical
     for i in range(0,3):
         if rows[0][i] == rows[1][i] == rows[2][i]:
-            win =  True
-            winning_token = rows[0][i]
+            return True
 
-    return win, winning_token
         
 #assert is_win((8,1,1))[0] == False
 
@@ -239,16 +232,16 @@ def turn(row1,row2,row3,player_num):
 
 
 def check_win(board_status,turn_number):
-    win, winning_token = is_win(board_status)
-    print(winning_token)
+    win = is_win(board_status)
+    winner = 0
     if win == True:
         #check winner
         #if winning_token == 'X':
         #    winner = 1
         #elif winning_token == 'O':
-        #    winner = 2
+       #     winner = 2
     #confirm win and break game if finished
-       # print(f'Player {winner} wins!')
+        print(f'Player {winner} wins!')
         playing = False
     elif win == False and turn_number <= 9:
         playing = True
