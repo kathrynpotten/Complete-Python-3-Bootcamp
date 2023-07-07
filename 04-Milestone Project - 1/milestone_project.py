@@ -424,5 +424,3 @@ def tictactoe2():
 
 #tictactoe2() """
 
-### 
-###         check that position is free to play
