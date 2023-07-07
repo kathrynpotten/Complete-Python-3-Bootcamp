@@ -139,7 +139,7 @@ def board(row1,row2,row3):
 
 
 
-def player():
+def player(row1,row2,row3):
     """ Ask for player's posiiton choice """
     choice = 'init'
     acceptable_range = range(1,10)
@@ -150,10 +150,24 @@ def player():
             print('Not on board')
         else:
             if int(choice) in acceptable_range:
-                within_range = True
+                if acceptable_move(choice,row1,row2,row3):
+                    within_range = True
+                else:
+                    print('Space already taken')
             else:
                 print('Not on board')
     return int(choice)
+
+def acceptable_move(choice, row1, row2, row3):
+    """ check that chosen position is free to play """
+    rows = row1+row2+row3
+    game_board_dict = {1: 0, 2: 2, 3: 4, 
+                   4: 5, 5: 7, 6: 9,
+                   7: 10, 8: 12, 9: 14}
+    if rows[game_board_dict[int(choice)]] == ' ':
+        return True
+    else:
+        return False
 
 
 
@@ -294,7 +308,7 @@ def turn(row1,row2,row3,player_num):
         token = 'X'
     elif player_num == 2:
         token = 'O'
-    choice = player()
+    choice = player(row1, row2, row3)
     row1, row2, row3 = update_board(choice, row1, row2, row3, token)
     board(row1,row2,row3)
     
@@ -315,7 +329,18 @@ def check_win(board):
     return playing
 
 
-def tictactoe():
+def replay():
+    answer = False
+    while answer == False:
+        replay = input('Play again? (yes/no): ').lower()
+        if replay == 'yes' or replay == 'no':
+            answer = True
+        else:
+            print('Answer not understood')  
+    return replay
+        
+
+def tictactoe_game():
 
     """ A game of tic tac toe for 2 players working at the same computer """
 
@@ -336,6 +361,7 @@ def tictactoe():
         #check if win
         board_status = rows_to_positions(row1,row2,row3)
         playing = check_win(board_status)
+        # if board full or win, end game
         if turn_number == 9 and playing == True:
             print('Game Over: draw')
             break
@@ -348,19 +374,26 @@ def tictactoe():
         #check if win
         board_status = rows_to_positions(row1,row2,row3)
         playing = check_win(board_status)
-        
-    print('Final board is: ')
+
+    print('\nFinal board is: ')
     board(row1, row2, row3)
 
     
     
-#tictactoe()
+#Run game
+
+again = 'yes'
+while again == 'yes':
+    tictactoe_game()
+    again = replay()
     
 
+
+
+
+""" Alternative coding
 def tictactoe2():
            
-    """ A game of tic tac toe for 2 players working at the same computer """
-
     # show players board set-up
     game_board()
     # set up game and display empty game board
@@ -384,9 +417,12 @@ def tictactoe2():
             elif playing == False:
                 break
         
+        
     print('Final board is: ')
     board(row1, row2, row3)
 
 
-tictactoe2()
+#tictactoe2() """
 
+### 
+###         check that position is free to play
