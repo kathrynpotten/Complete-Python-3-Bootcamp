@@ -115,25 +115,32 @@ player2_wins = [win for win in player2_wins if win not in both_win]
 
 
 
-
+#Game set-up: possible playing positions, empty game board
 
 def game_board():
+    print('\n')
     print('1|2|3')
     print('_ _ _')
     print('4|5|6')
     print('_ _ _')
     print('7|8|9')
+    print('\n')
 
 
 def board(row1,row2,row3):
+    print('\n')
     print(row1)
     print('_ _ _')
     print(row2)
     print('_ _ _')
     print(row3)
+    print('\n')
+
+
 
 
 def player():
+    """ Ask for player's posiiton choice """
     choice = 'init'
     acceptable_range = range(1,10)
     within_range = False
@@ -148,7 +155,10 @@ def player():
                 print('Not on board')
     return int(choice)
 
+
+
 def update_board(choice,row1,row2,row3,player):
+    """ Update the board with the players choice """
     row1 = list(row1)
     row2 = list(row2)
     row3 = list(row3)
@@ -164,6 +174,8 @@ def update_board(choice,row1,row2,row3,player):
     return ''.join(row1),''.join(row2),''.join(row3)
 
 
+""" Set up possible winning boards """
+
 from collections import Counter
 from itertools import combinations, permutations
 
@@ -178,48 +190,106 @@ positions = {1: ' | | ', 2: ' | |X', 3: ' | |O',
              22: 'O|X| ', 23: 'O|X|X', 24: 'O|X|O',
              25: 'O|O| ', 26: 'O|O|X', 27: 'O|O|O'}
 
-#define impossible boards
-def is_impossible(win):
+
+def is_impossible(board):
+    """ define impossible boards: players should
+    have played an equal number of times or X one more as X plays first"""
     tokens = ''
-    for position in win:
+    for position in board:
         tokens += positions[position]
     count = Counter(tokens)
-    return count['X']-count['O'] > 1 or count['X'] < 3
+    return count['X']-count['O'] > 1
 
 assert is_impossible((14,9,17)) == False
 
-#possible boards
+
+# set up list of possible boards
 boards = permutations(positions.keys(),3)
 possible_boards = [board for board in boards if is_impossible(board) == False]
 
-#wins
-def is_win(board):
-    if board not in possible_boards:
+
+def possible_win(board):
+    """ check if a win is possible at this point in the game, 
+    i.e. X has played at least 3 times"""
+    tokens = ''
+    for position in board:
+        tokens += positions[position]
+    count = Counter(tokens)
+    return count['X'] >= 3
+
+assert possible_win((19,6,2)) == True
+
+# set up list of boards where a win could be possible (i.e. sufficient number of moves played)
+possible_to_win = [board for board in possible_boards if possible_win(board) == True]
+
+
+# functions to define different types of win. All functions return the winning token if a win has occured.
+def diagonal_win(rows):
+    if rows[0][0] == rows[1][2] == rows[2][4] and rows[0][0] != ' ':
+        return rows[1][2]
+    elif rows[0][4] == rows[1][2] == rows[2][0] and rows[0][4] != ' ':
+        return rows[1][2]
+    else:
         return False
-    rows = [positions[board[i]] for i in range(0,3)]
-    #horizontal
+    
+def vertical_win(rows):
+    for i in range(0,5,2):
+        if rows[0][i] == rows[1][i] == rows[2][i] and rows[0][i] != ' ': 
+            return rows[0][i]
+    return False 
+
+def horizontal_win(rows):
     for row in rows:
-        if row[0] == row[2] == row[4]:
-            return True
-    #diagonal
-    if rows[0][0] == rows[1][2] == rows[2][4]:
-        return True
-    if rows[0][4] == rows[1][2] == rows[2][0]:
-        return True
-    #vertical
-    for i in range(0,3):
-        if rows[0][i] == rows[1][i] == rows[2][i]:
-            return True
+        if row[0] == row[2] == row[4] and row[0] != ' ':
+            return row[0]
+    return False
 
-        
-#assert is_win((8,1,1))[0] == False
 
+def is_win(board):
+    """ check if a board contains any wins. If more than one 'win' reject as impossible """
+    rows = [positions[board[i]] for i in range(0,3)]
+    diagonal = diagonal_win(rows)
+    vertical= vertical_win(rows)
+    horizontal = horizontal_win(rows)
+    wins = [diagonal, vertical, horizontal]
+    win_count = Counter(wins)
+    if win_count[False] == 1 or win_count[False] == 0:
+        return False 
+    elif diagonal != False:
+        return diagonal
+    elif vertical != False:
+        return vertical
+    elif horizontal != False:
+        return horizontal
+    else:
+        return False
+
+  
+assert is_win((8,1,1)) == False
+assert is_win((19,22,2)) == 'X'
+assert is_win((24,23,8)) == False
+assert is_win((19,6,2)) == 'X'
+    
+#set up dictionary of winning boards with correspoding win token
+winning_boards = {board: is_win(board) for board in possible_to_win if is_win(board) != False}
+
+test_board = (19,6,2)
+test_win = {test_board: is_win(test_board)}
+#print(test_win)
+       
+assert (19,6,2) in winning_boards
+
+     
+            
+      
+#convert set of rows into positional tuple
 def rows_to_positions(row1,row2,row3):
     positions_inverted = {value: key for key,value in positions.items()}
     return (positions_inverted[row1],positions_inverted[row2],positions_inverted[row3])
         
 
 def turn(row1,row2,row3,player_num):
+    """ enacts the players turn """
     if player_num == 1:
         token = 'X'
     elif player_num == 2:
@@ -231,23 +301,17 @@ def turn(row1,row2,row3,player_num):
     return row1,row2,row3
 
 
-def check_win(board_status,turn_number):
-    win = is_win(board_status)
-    winner = 0
-    if win == True:
-        #check winner
-        #if winning_token == 'X':
-        #    winner = 1
-        #elif winning_token == 'O':
-       #     winner = 2
-    #confirm win and break game if finished
-        print(f'Player {winner} wins!')
+def check_win(board):
+    """ checks if the current board is a win. 
+    Stops the game if this is the case and returns the winning player """
+    if board in winning_boards:
+        if winning_boards[board] == 'X':
+            print('Player 1 wins!')
+        elif winning_boards[board] == 'O':
+            print('Player 2 wins!')
         playing = False
-    elif win == False and turn_number <= 9:
+    else:
         playing = True
-    elif win == False:
-        print('Game over: draw')
-        playing = False
     return playing
 
 
@@ -257,11 +321,10 @@ def tictactoe():
 
     # show players board set-up
     game_board()
-    # set up game
+    # set up game and display empty game board
     row1 = ' | | '
     row2 = ' | | '
     row3 = ' | | '
-    print('\n\n')
     board(row1, row2, row3)
     playing = True
     turn_number = 0
@@ -272,8 +335,11 @@ def tictactoe():
         turn_number += 1
         #check if win
         board_status = rows_to_positions(row1,row2,row3)
-        playing = check_win(board_status, turn_number)
-        if playing == False:
+        playing = check_win(board_status)
+        if turn_number == 9 and playing == True:
+            print('Game Over: draw')
+            break
+        elif playing == False:
             break
         #player2
         print("Player 2's Turn")
@@ -281,7 +347,7 @@ def tictactoe():
         turn_number += 1
         #check if win
         board_status = rows_to_positions(row1,row2,row3)
-        playing = check_win(board_status, turn_number)
+        playing = check_win(board_status)
         
     print('Final board is: ')
     board(row1, row2, row3)
