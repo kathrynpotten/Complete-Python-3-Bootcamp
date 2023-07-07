@@ -354,14 +354,39 @@ def tictactoe():
 
     
     
-
-
-
-tictactoe()
+#tictactoe()
     
 
+def tictactoe2():
+           
+    """ A game of tic tac toe for 2 players working at the same computer """
+
+    # show players board set-up
+    game_board()
+    # set up game and display empty game board
+    row1 = ' | | '
+    row2 = ' | | '
+    row3 = ' | | '
+    board(row1, row2, row3)
+    playing = True
+    turn_number = 0
+    while playing:
+        for i in range(1,3):
+            print(f"Player {i}'s Turn")
+            row1, row2, row3 = turn(row1, row2, row3, i)
+            turn_number += 1
+            #check if win
+            board_status = rows_to_positions(row1,row2,row3)
+            playing = check_win(board_status)
+            if turn_number == 9 and playing == True:
+                print('Game Over: draw')
+                break
+            elif playing == False:
+                break
         
+    print('Final board is: ')
+    board(row1, row2, row3)
 
 
-
+tictactoe2()
 
