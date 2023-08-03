@@ -54,5 +54,6 @@ class TestProject(unittest.TestCase):
         player.has_ace()
         self.assertEqual(player.value_with_aces,13)
 
+
 if __name__ == '__main__':
     unittest.main()

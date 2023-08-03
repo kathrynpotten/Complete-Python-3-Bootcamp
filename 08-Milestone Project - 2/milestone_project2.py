@@ -115,10 +115,11 @@ class Player:
         ranks = [card.rank for card in self.all_cards]
         counts = Counter(ranks)
         aces = counts['Ace']
-        self.value_with_aces = self.value
-        while self.value_with_aces <= 11:
-            for _ in range(aces):
-                self.value_with_aces += 10 
+        if aces > 0:
+            self.value_with_aces = self.value
+            while self.value_with_aces <= 11:
+                for _ in range(aces):
+                    self.value_with_aces += 10 
         return aces
 
     def choose_aces(self):
@@ -135,6 +136,73 @@ class Dealer(Player):
     def __str__(self):
         return f"{self.name} has {len(self.all_cards)} cards."
 
+
+
+def player_turn(player, deck, round_end = False):
+    """ function to run the player's turn in a Blackjack game """
+    player_turn = True
+    print(f'Player {player.name} to play')
+    while player_turn:
+        player_choice = input('Would you like to hit or stand? ')
+        if player_choice.lower() == 'hit':
+            new_card = deck.deal_one()
+            player.add_cards(new_card)
+            print(f'Your hand is {player.hand()}')
+            if player.value > 21:
+                print(f"Bust! Player {player.name} loses")
+                player.lose_money(player.bet)
+                round_end = True
+                player_turn = False
+                break
+            elif player.has_ace() > 0:
+                    if player.value_with_aces == player.value:
+                         print(f'Your current total is {player.value}')
+                    else:
+                        print(f'Your current total is {player.value}, or {player.value_with_aces} with aces as eleven')
+                        player.choose_aces()
+            else:
+                print(f'Your current total is {player.value}')      
+        elif player_choice.lower() == 'stand':
+            player_turn = False
+            break
+        else:
+            print('Invalid choice, please choose again.')
+    return round_end, player
+
+def dealer_turn(dealer, player, deck, round_end = False):
+    """ function to run the automated dealer's turn in a Blackjack game """
+    dealer_turn = True
+    print(f'Dealer to play')
+    while dealer_turn:
+        if dealer.value < player.value:
+            new_card = deck.deal_one()
+            dealer.add_cards(new_card)
+            if dealer.has_ace() > 0:
+                        if dealer.value_with_aces > player.value:
+                            print(f'Dealer has {dealer.value}, dealer wins')
+                            player.lose_money(player.bet)
+                            round_end = True
+                            dealer_turn = False
+                            break
+            elif dealer.value > 21:
+                        print(f"Bust! Player {player.name} wins")
+                        player.add_money(2*player.bet)
+                        round_end = True
+                        dealer_turn = False
+                        break
+        elif dealer.value > player.value and dealer.value > 21:
+                    print(f"Bust! Player {player.name} wins")
+                    player.add_money(2*player.bet)
+                    round_end = True
+                    dealer_turn = False
+                    break
+        elif dealer.value > player.value:
+                    print(f'Dealer has {dealer.value}, dealer wins')
+                    player.lose_money(player.bet)
+                    round_end = True
+                    dealer_turn = False
+                    break    
+    return round_end, dealer, player
 
 
 
@@ -155,105 +223,45 @@ if __name__ == "__main__":
         round_number += 1
         round_end = False
 
-        while round_end == False:
-            new_deck = Deck()
-            new_deck.shuffle()
+        
+        new_deck = Deck()
+        new_deck.shuffle()
 
-            print(f"\nRound {round_number}\n")
+        print(f"\nRound {round_number}\n")
             
-            # deal initial cards
-            for _ in range(2):
+        # deal initial cards
+        for _ in range(2):
                 print('Dealing cards...')
                 player.add_cards(new_deck.deal_one())
                 dealer.add_cards(new_deck.deal_one())
             
-            print('Initial hand dealt')
-            print(f'Your hand is {player.hand()}')
+        print('Initial hand dealt')
+        print(f'Your hand is {player.hand()}')
 
-#### ISSUE HERE ####
-            # inform player of current hand value, including any aces present
-            if player.has_ace() == 1:
-                print(f"You have an Ace!")
-                print(f'Your current total is {player.value}, or {player.value_with_aces} with aces as eleven')
-                player.choose_aces()
-            elif player.has_ace() == 2:
-                print(f"You have two Aces!")
-                print(f'Your current total is {player.value}, or {player.value_with_aces}  with aces as eleven')
-            else:
-                print(f'Your current total is {player.value}')
+        # inform player of current hand value, including any aces present
+        if player.has_ace() > 0:
+            print(f"You have an Ace!")
+            print(f'Your current total is {player.value}, or {player.value_with_aces} with aces as eleven')
+            player.choose_aces()
+        else:
+            print(f'Your current total is {player.value}')
 
 
-            # place bet
-            player.place_bet()
+        # place bet
+        player.place_bet()
+
+        while round_end == False:
 
             # player turn
-            player_turn = True
-            print(f'Player {player.name} to play')
-            while player_turn:
-                player_choice = input('Would you like to hit or stand? ')
-                if player_choice.lower() == 'hit':
-                    new_card = new_deck.deal_one()
-                    player.add_cards(new_card)
-                    print(f'Your hand is {player.hand()}')
-                    player.has_ace()
-                    if player.has_ace() > 0:
-                        print(f'Your current total is {player.value}, or {player.value_with_aces} with aces as eleven')
-                        player.choose_aces()
-                    else:
-                        print(f'Your current total is {player.value}')
-                    
-                    if player.value > 21:
-                        print(f"Bust! Player {player.name} loses")
-                        player.lose_money(player.bet)
-                        round_end = True
-                        player_turn = False
-                        break
-                elif player_choice.lower() == 'stand':
-                    player_turn = False
-                    break
-                else:
-                    print('Invalid choice, please choose again.')
+            round_end, player = player_turn(player, new_deck)
 
             if round_end:
                 break
 
             # dealer turn
-            dealer_turn = True
-            print(f'Dealer to play')
-            while dealer_turn:
-                if dealer.value < player.value:
-                    new_card = new_deck.deal_one()
-                    dealer.add_cards(new_card)
-                    dealer.has_ace()
-                    if dealer.has_ace() > 0:
-                        if dealer.value_with_aces > player.value:
-                            print(f'Dealer has {dealer.value}, dealer wins')
-                            player.lose_money(player.bet)
-                            round_end = True
-                            dealer_turn = False
-                            break
-                        else:
-                            continue
-                    elif dealer.value > 21:
-                        print(f"Bust! Player {player.name} wins")
-                        player.add_money(2*player.bet)
-                        round_end = True
-                        dealer_turn = False
-                        break
-                    continue
-                elif dealer.value > player.value and dealer.value > 21:
-                    print(f"Bust! Player {player.name} wins")
-                    player.add_money(2*player.bet)
-                    round_end = True
-                    dealer_turn = False
-                    break
-                elif dealer.value > player.value:
-                    print(f'Dealer has {dealer.value}, dealer wins')
-                    player.lose_money(player.bet)
-                    round_end = True
-                    dealer_turn = False
-                    break
+            round_end, dealer, player = dealer_turn(dealer, player, new_deck)
         
+
         player.remove_hand()
         dealer.remove_hand()
 
@@ -270,4 +278,4 @@ if __name__ == "__main__":
 
                 
 
-
+### write additional tests for game ###
