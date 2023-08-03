@@ -1,5 +1,3 @@
-""" Milestone Project 2 - Blackjack Game """
-
 
 import random
 from collections import Counter
@@ -205,77 +203,13 @@ def dealer_turn(dealer, player, deck, round_end = False):
             break    
     return round_end, dealer, player
 
-
-
-if __name__ == "__main__":
-
-    # define dealer and player
-    dealer = Dealer()
-    player_name = input('Choose a name: ')
-    player = Player(player_name)
-
-    # get player total money pot
-    player.initial_money_pot()
+def test_card_value():
+    assert Card("Hearts","Two").value == 2
     
-    round_number = 0 
-    game_on = True
+def test_picture_card_value():
+    assert Card("Hearts","King").value == 10
 
-    while game_on:
-        round_number += 1
-        round_end = False
-
-        
-        new_deck = Deck()
-        new_deck.shuffle()
-
-        print(f"\nRound {round_number}\n")
-            
-        # deal initial cards
-        for _ in range(2):
-                print('Dealing cards...')
-                player.add_cards(new_deck.deal_one())
-                dealer.add_cards(new_deck.deal_one())
-            
-        print('Initial hand dealt')
-        print(f'Your hand is {player.hand()}')
-
-        # inform player of current hand value, including any aces present
-        if player.has_ace() > 0:
-            print(f"You have an Ace!")
-            print(f'Your current total is {player.value}, or {player.value_with_aces} with aces as eleven')
-            player.choose_aces()
-        else:
-            print(f'Your current total is {player.value}')
-
-
-        # place bet
-        player.place_bet()
-
-        while round_end == False:
-
-            # player turn
-            round_end, player = player_turn(player, new_deck)
-
-            if round_end:
-                break
-
-            # dealer turn
-            round_end, dealer, player = dealer_turn(dealer, player, new_deck)
-        
-
-        player.remove_hand()
-        dealer.remove_hand()
-
-        if player.money <= 0:
-            print("You're bankrupt! Game over")
-            game_on = False
-        else:
-            print(f"Your current bankroll is {player.money}")
-            game = input('Do you want to continue? (yes/no) ')
-            if game.lower() in ['y', 'yes']:
-                pass
-            else:
-                game_on = False
-
-                
-
+def test_player_add_one_card():
+    player = Player()
+    player.add_cards(Card("Hearts","Two"))
+    assert str(player.all_cards[0]) == 'Two of Hearts'
