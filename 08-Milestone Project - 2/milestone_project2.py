@@ -153,6 +153,17 @@ class Dealer(Player):
     def __str__(self):
         return f"{self.name} has {len(self.all_cards)} cards."
 
+    def start_hand(self):
+        return str(self.all_cards[0])
+
+
+def hit(deck, player):
+    """function for if player chooses to hit"""
+    player.add_cards(deck.deal_one())
+    print(f"Your hand is {player.hand()}")
+    player.aces()
+    print(f"Your current total is {player.value}")
+
 
 def player_turn(player, deck, round_end=False):
     """function to run the player's turn in a Blackjack game"""
@@ -161,17 +172,13 @@ def player_turn(player, deck, round_end=False):
     while player_turn:
         player_choice = input("Would you like to hit or stand? ")
         if player_choice.lower() == "hit":
-            player.add_cards(deck.deal_one())
-            print(f"Your hand is {player.hand()}")
-            player.aces()
+            hit(new_deck, player)
             if player.value > 21:
                 print(f"Bust! Player {player.name} loses")
                 player.lose_money(player.bet)
                 round_end = True
                 player_turn = False
                 break
-            else:
-                print(f"Your current total is {player.value}")
         elif player_choice.lower() == "stand":
             player_turn = False
             break
@@ -190,18 +197,23 @@ def dealer_turn(dealer, player, deck, round_end=False):
             dealer.aces()
             continue
         elif dealer.value > 21:
+            print(f"Dealer's hand is {dealer.hand()}")
+            print(f"Dealer has {dealer.value}")
             print(f"Bust! Player {player.name} wins")
             player.add_money(2 * player.bet)
             round_end = True
             dealer_turn = False
             break
         elif dealer.value > player.value and dealer.value > 21:
+            print(f"Dealer's hand is {dealer.hand()}")
+            print(f"Dealer has {dealer.value}")
             print(f"Bust! Player {player.name} wins")
             player.add_money(2 * player.bet)
             round_end = True
             dealer_turn = False
             break
         elif dealer.value > player.value and dealer.value <= 21:
+            print(f"Dealer's hand is {dealer.hand()}")
             print(f"Dealer has {dealer.value}, dealer wins")
             player.lose_money(player.bet)
             round_end = True
@@ -240,15 +252,13 @@ if __name__ == "__main__":
         print("Initial hand dealt")
         print(f"Your hand is {player.hand()}")
 
-        # inform player of current hand value, including any aces present
-        if player.has_ace():
-            print(f"You have an Ace!")
-            print(
-                f"Your current total is {player.value}, or {player.value_with_aces} with aces as eleven"
-            )
-            player.choose_aces()
-        else:
-            print(f"Your current total is {player.value}")
+        # adjust for aces if necessary
+        player.aces()
+        dealer.aces()
+
+        # inform player of current hand value
+        print(f"Your current total is {player.value}")
+        print(f"Dealer's card is {dealer.start_hand()}")
 
         # place bet
         player.place_bet()
@@ -276,3 +286,7 @@ if __name__ == "__main__":
                 pass
             else:
                 game_on = False
+
+
+### show one of the dealer's cards at the start ###
+### show all hands at the end

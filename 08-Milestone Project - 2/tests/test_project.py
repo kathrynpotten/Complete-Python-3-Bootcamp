@@ -82,3 +82,15 @@ def test_dealer_win_ace():
     )
 
     assert dealer_win == True
+
+
+def test_two_aces():
+    dealer = milestone_project2.Dealer()
+    dealer.add_cards(
+        [
+            milestone_project2.Card("Hearts", "Ace"),
+            milestone_project2.Card("Clubs", "Ace"),
+        ]
+    )
+    dealer.aces()
+    assert dealer.value == 12
