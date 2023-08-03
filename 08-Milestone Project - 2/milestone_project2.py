@@ -179,12 +179,13 @@ def dealer_turn(dealer, player, deck, round_end = False):
             new_card = deck.deal_one()
             dealer.add_cards(new_card)
             if dealer.has_ace() > 0:
-                if dealer.value_with_aces > player.value:
+                if dealer.value_with_aces > player.value and dealer.value <= 21:
                     print(f'Dealer has {dealer.value}, dealer wins')
                     player.lose_money(player.bet)
                     round_end = True
                     dealer_turn = False
                     break
+                break
         elif dealer.value > 21:
             print(f"Bust! Player {player.name} wins")
             player.add_money(2*player.bet)
@@ -197,7 +198,7 @@ def dealer_turn(dealer, player, deck, round_end = False):
             round_end = True
             dealer_turn = False
             break
-        elif dealer.value > player.value:
+        elif dealer.value > player.value and dealer.value <= 21:
             print(f'Dealer has {dealer.value}, dealer wins')
             player.lose_money(player.bet)
             round_end = True
