@@ -178,30 +178,30 @@ def dealer_turn(dealer, player, deck, round_end = False):
             new_card = deck.deal_one()
             dealer.add_cards(new_card)
             if dealer.has_ace() > 0:
-                        if dealer.value_with_aces > player.value:
-                            print(f'Dealer has {dealer.value}, dealer wins')
-                            player.lose_money(player.bet)
-                            round_end = True
-                            dealer_turn = False
-                            break
-            elif dealer.value > 21:
-                        print(f"Bust! Player {player.name} wins")
-                        player.add_money(2*player.bet)
-                        round_end = True
-                        dealer_turn = False
-                        break
-        elif dealer.value > player.value and dealer.value > 21:
-                    print(f"Bust! Player {player.name} wins")
-                    player.add_money(2*player.bet)
-                    round_end = True
-                    dealer_turn = False
-                    break
-        elif dealer.value > player.value:
+                if dealer.value_with_aces > player.value:
                     print(f'Dealer has {dealer.value}, dealer wins')
                     player.lose_money(player.bet)
                     round_end = True
                     dealer_turn = False
-                    break    
+                    break
+        elif dealer.value > 21:
+            print(f"Bust! Player {player.name} wins")
+            player.add_money(2*player.bet)
+            round_end = True
+            dealer_turn = False
+            break
+        elif dealer.value > player.value and dealer.value > 21:
+            print(f"Bust! Player {player.name} wins")
+            player.add_money(2*player.bet)
+            round_end = True
+            dealer_turn = False
+            break
+        elif dealer.value > player.value:
+            print(f'Dealer has {dealer.value}, dealer wins')
+            player.lose_money(player.bet)
+            round_end = True
+            dealer_turn = False
+            break    
     return round_end, dealer, player
 
 
@@ -271,11 +271,11 @@ if __name__ == "__main__":
         else:
             print(f"Your current bankroll is {player.money}")
             game = input('Do you want to continue? (yes/no) ')
-            if game.lower() == 'yes':
+            if game.lower() in ['y', 'yes']:
                 pass
             else:
                 game_on = False
 
                 
 
-### write additional tests for game ###
+
