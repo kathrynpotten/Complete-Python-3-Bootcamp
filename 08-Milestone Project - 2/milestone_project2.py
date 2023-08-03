@@ -33,7 +33,7 @@ values = {
     "Jack": 10,
     "Queen": 10,
     "King": 10,
-    "Ace": 1,
+    "Ace": 11,
 }
 
 
@@ -136,23 +136,14 @@ class Player:
             else:
                 break
 
-    def has_ace(self):
+    def aces(self):
         ranks = [card.rank for card in self.all_cards]
         counts = Counter(ranks)
         aces = counts["Ace"]
-        if aces > 0:
-            self.value_with_aces = self.value
-            while self.value_with_aces <= 11:
-                for _ in range(aces):
-                    self.value_with_aces += 10
-        return aces
-
-    def choose_aces(self):
-        player_choice = input(
-            "Would you like to choose the value with aces eleven? (yes/no) "
-        )
-        if player_choice == "yes":
-            player.value = player.value_with_aces
+        while self.value > 21 and aces:
+            self.value -= 10
+            aces -= 1
+        return counts["Ace"]
 
 
 class Dealer(Player):
@@ -170,23 +161,15 @@ def player_turn(player, deck, round_end=False):
     while player_turn:
         player_choice = input("Would you like to hit or stand? ")
         if player_choice.lower() == "hit":
-            new_card = deck.deal_one()
-            player.add_cards(new_card)
+            player.add_cards(deck.deal_one())
             print(f"Your hand is {player.hand()}")
+            player.aces()
             if player.value > 21:
                 print(f"Bust! Player {player.name} loses")
                 player.lose_money(player.bet)
                 round_end = True
                 player_turn = False
                 break
-            elif player.has_ace() > 0:
-                if player.value_with_aces == player.value:
-                    print(f"Your current total is {player.value}")
-                else:
-                    print(
-                        f"Your current total is {player.value}, or {player.value_with_aces} with aces as eleven"
-                    )
-                    player.choose_aces()
             else:
                 print(f"Your current total is {player.value}")
         elif player_choice.lower() == "stand":
@@ -203,16 +186,9 @@ def dealer_turn(dealer, player, deck, round_end=False):
     print(f"Dealer to play")
     while dealer_turn:
         if dealer.value < player.value:
-            new_card = deck.deal_one()
-            dealer.add_cards(new_card)
-            if dealer.has_ace() > 0:
-                if dealer.value_with_aces > player.value and dealer.value <= 21:
-                    print(f"Dealer has {dealer.value}, dealer wins")
-                    player.lose_money(player.bet)
-                    round_end = True
-                    dealer_turn = False
-                    break
-                break
+            dealer.add_cards(deck.deal_one())
+            dealer.aces()
+            continue
         elif dealer.value > 21:
             print(f"Bust! Player {player.name} wins")
             player.add_money(2 * player.bet)
@@ -265,7 +241,7 @@ if __name__ == "__main__":
         print(f"Your hand is {player.hand()}")
 
         # inform player of current hand value, including any aces present
-        if player.has_ace() > 0:
+        if player.has_ace():
             print(f"You have an Ace!")
             print(
                 f"Your current total is {player.value}, or {player.value_with_aces} with aces as eleven"
