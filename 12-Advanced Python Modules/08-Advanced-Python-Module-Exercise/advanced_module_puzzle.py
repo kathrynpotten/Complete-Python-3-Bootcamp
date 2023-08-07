@@ -12,7 +12,7 @@ for folder, sub_folders, files in os.walk(path):
         with open(folder + "/" + file, "r", encoding="utf-8") as f:
             lines = f.readlines()
         for line in lines:
-            pattern = "\d{3}-\d{3}-\d{4}"
+            pattern = r"\d{3}-\d{3}-\d{4}"
             phone_number = re.findall(pattern, line)
             if phone_number != []:
                 print(f"The phone number is in {folder}")
