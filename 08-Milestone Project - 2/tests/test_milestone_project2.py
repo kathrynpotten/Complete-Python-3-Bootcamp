@@ -57,6 +57,15 @@ class TestProject(unittest.TestCase):
         player.aces()
         self.assertEqual(player.value, 13)
 
+    def test_val_one_ace3(self):
+        player = milestone_project2.Player("One")
+        card_1 = milestone_project2.Card("Hearts", "Ace")
+        card_2 = milestone_project2.Card("Diamonds", "Two")
+        card_3 = milestone_project2.Card("Diamonds", "Jack")
+        player.add_cards([card_1, card_2, card_3])
+        player.aces()
+        self.assertEqual(player.value, 13)
+
 
 if __name__ == "__main__":
     unittest.main()
